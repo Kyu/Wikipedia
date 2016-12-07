@@ -16,12 +16,7 @@ install_reqs = [
   if line.strip() != ''
 ]
 
-version = re.search(
-  "^__version__ = \((\d+), (\d+), (\d+)\)$",
-  local_file('wikipedia/__init__.py').read(),
-  re.MULTILINE
-).groups()
-
+version = ("1", "4", "0")
 
 setuptools.setup(
   name = "wikipedia",
