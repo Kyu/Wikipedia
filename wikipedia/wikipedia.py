@@ -231,6 +231,8 @@ async def summary(title, sentences=0, chars=0, auto_suggest=True, redirect=True)
   # use auto_suggest and redirect to get the correct article
   # also, use page's error checking to raise DisambiguationError if necessary
   page_info = await page(title, auto_suggest=auto_suggest, redirect=redirect)
+  print(dir(page_info))
+  print("Moce")
   title = page_info.title
   pageid = page_info.pageid
 
@@ -298,7 +300,8 @@ class WikipediaPage(object):
     else:
       raise ValueError("Either a title or a pageid must be specified")
 
-    self.__load(redirect=redirect, preload=preload)
+    # GET THIS TO WORK
+    await self.__load(redirect=redirect, preload=preload)
 
     if preload:
       for prop in ('content', 'summary', 'images', 'references', 'links', 'sections'):
@@ -745,4 +748,4 @@ async def _wiki_request(params):
     if RATE_LIMIT:
       RATE_LIMIT_LAST_CALL = datetime.now()
 
-    return r.json()
+    return await r.json()
