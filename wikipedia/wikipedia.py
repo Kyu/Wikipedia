@@ -21,6 +21,8 @@ RATE_LIMIT_LAST_CALL = None
 USER_AGENT = 'wikipedia (https://github.com/goldsmith/Wikipedia/)'
 
 loop = asyncio.get_event_loop()
+
+#ignore this comment
 def set_lang(prefix):
   '''
   Change the language of the API being requested.
@@ -231,8 +233,6 @@ async def summary(title, sentences=0, chars=0, auto_suggest=True, redirect=True)
   # use auto_suggest and redirect to get the correct article
   # also, use page's error checking to raise DisambiguationError if necessary
   page_info = await page(title, auto_suggest=auto_suggest, redirect=redirect)
-  print(dir(page_info))
-  print("Moce")
   title = page_info.title
   pageid = page_info.pageid
 
@@ -277,9 +277,15 @@ async def page(title=None, pageid=None, auto_suggest=True, redirect=True, preloa
       except IndexError:
         # if there is no suggestion or search results, the page doesn't exist
         raise PageError(title)
-    return WikipediaPage(title, redirect=redirect, preload=preload)
+    _page = WikipediaPage(title, redirect=redirect, preload=preload)
+    await _page._load(redirect=redirect, preload=preload)
+    return _page
+    # return WikipediaPage(title, redirect=redirect, preload=preload)
   elif pageid is not None:
-    return WikipediaPage(pageid=pageid, preload=preload)
+    _page = WikipediaPage(pageid=pageid, preload=preload)
+    await _page._load(redirect=redirect, preload=preload)
+    return _page
+    # return WikipediaPage(pageid=pageid, preload=preload)
   else:
     raise ValueError("Either a title or a pageid must be specified")
 
@@ -301,7 +307,7 @@ class WikipediaPage(object):
       raise ValueError("Either a title or a pageid must be specified")
 
     # GET THIS TO WORK
-    await self.__load(redirect=redirect, preload=preload)
+    #await self.__load(redirect=redirect, preload=preload)
 
     if preload:
       for prop in ('content', 'summary', 'images', 'references', 'links', 'sections'):
@@ -320,7 +326,7 @@ class WikipediaPage(object):
     except:
       return False
 
-  async def __load(self, redirect=True, preload=False):
+  async def _load(self, redirect=True, preload=False):
     '''
     Load basic information from Wikipedia.
     Confirm that page exists and is not a disambiguation/redirect.
@@ -406,7 +412,7 @@ class WikipediaPage(object):
     return None
     '''
     Based on https://www.mediawiki.org/wiki/API:Query#Continuing_queries
-
+    '''
     query_params.update(self.__title_query_param)
 
     last_continue = {}
@@ -424,16 +430,16 @@ class WikipediaPage(object):
       pages = request['query']['pages']
       if 'generator' in query_params:
         for datum in pages.values():  # in python 3.3+: "yield from pages.values()"
-          yield datum
+          return datum
       else:
         for datum in pages[self.pageid][prop]:
-          yield datum
+          return datum
 
       if 'continue' not in request:
         break
 
       last_continue = request['continue']
-'''
+
   @property
   def __title_query_param(self):
     if getattr(self, 'title', None) is not None:
